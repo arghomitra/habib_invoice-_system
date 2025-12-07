@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice System - Nimo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #e8ecf1;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .company-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: background 0.2s;
+            color: #374151;
+        }
+
+        .icon-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .icon-btn.delete {
+            background: #ef4444;
+            color: white;
+            border-radius: 12px;
+        }
+
+        .icon-btn.delete:hover {
+            background: #dc2626;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            font-size: 17px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+            color: #6b7280;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 28px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 26px;
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 20px 18px 58px;
+            border: 3px solid #3b82f6;
+            border-radius: 18px;
+            font-size: 19px;
+            color: #111827;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .product-item {
+            padding: 22px 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 19px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .product-price {
+            font-size: 17px;
+            color: #6b7280;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .qty-input {
+            width: 70px;
+            height: 48px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            color: #111827;
+            transition: all 0.2s;
+        }
+
+        .qty-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .total-section {
+            text-align: right;
+            padding: 28px 0 12px 0;
+        }
+
+        .total-label {
+            font-size: 19px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: -0.02em;
+        }
+
+        .comments-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 18px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            font-size: 17px;
+            font-family: inherit;
+            resize: vertical;
+            color: #6b7280;
+        }
+
+        .comments-textarea:focus {
+            outline: none;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .comments-textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .header-icons {
+                display: none !important;
+            }
+            .search-container {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .company-name {
+                font-size: 28px;
+            }
+
+            .header {
+                padding: 14px 16px;
+            }
+
+            .header-icons {
+                gap: 6px;
+            }
+
+            .icon-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+
+            .product-item {
+                flex-direction: row;
+                align-items: center;
+                padding: 18px 0;
+            }
+
+            .product-name {
+                font-size: 17px;
+            }
+
+            .product-price {
+                font-size: 15px;
+            }
+
+            .quantity-controls {
+                gap: 12px;
+            }
+
+            .qty-input {
+                width: 60px;
+                height: 42px;
+                font-size: 18px;
+            }
+
+            .total-amount {
+                font-size: 36px;
+            }
+
+            .input-field, .search-input, .comments-textarea {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">Nimo</div>
+        <div class="header-icons">
+            <button class="icon-btn" onclick="openEditWebsite()" title="Edit">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" onclick="downloadPDF()" title="Download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+            </button>
+            <button class="icon-btn" onclick="shareInvoice()" title="Share">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+                </svg>
+            </button>
+            <button class="icon-btn delete" onclick="clearData()" title="Clear All">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="invoiceContent">
+        <div class="card">
+            <input type="text" class="input-field" id="customerName" placeholder="Name / Company Name" oninput="saveData(false)">
+            <input type="text" class="input-field" id="customerAddress" placeholder="Address" oninput="saveData(false)" style="margin-bottom: 0;">
+        </div>
+
+        <div class="card">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
+            </div>
+
+            <div id="productsList"></div>
+
+            <div class="total-section">
+                <div class="total-label">Total</div>
+                <div class="total-amount">€<span id="grandTotal">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <textarea class="comments-textarea" id="comments" placeholder="Additional comments..." oninput="saveData(false)"></textarea>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let filteredProducts = [];
+        let quantities = {};
+        let isLoadingProducts = true;
+
+        // Load products from Google Sheets
+        async function loadProductsFromSheet() {
+            try {
+                const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTsQ5pAZQYiTW4HDiosBT8XyILxfybIFf2YCN43D-4FB0Fgb3sI3DINwZM9E15GP_81RbwuUmQH4L8P/pub?gid=588089457&single=true&output=csv';
+                
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                
+                // Parse CSV - Column A = Name, Column B = Price
+                const rows = csvText.split('\n').filter(row => row.trim());
+                
+                products = [];
+                rows.forEach((row, index) => {
+                    // Handle CSV parsing with quoted values
+                    const match = row.match(/(?:^|,)(?:"([^"]*)"|([^,]*))/g);
+                    if (match && match.length >= 2) {
+                        const nameRaw = match[0].replace(/^,?"?|"?$/g, '').trim();
+                        const priceRaw = match[1].replace(/^,?"?|"?$/g, '').trim();
+                        
+                        const name = nameRaw;
+                        const price = parseFloat(priceRaw);
+                        
+                        if (name && !isNaN(price) && price > 0) {
+                            products.push({
+                                id: index + 1,
+                                name: name,
+                                price: price
+                            });
+                        }
+                    }
+                });
+
+                filteredProducts = [...products];
+                isLoadingProducts = false;
+                renderProducts();
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                isLoadingProducts = false;
+                document.getElementById('productsList').innerHTML = 
+                    '<div class="no-products">Error loading products. Please check your connection.</div>';
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            
+            if (isLoadingProducts) {
+                container.innerHTML = '<div class="no-products">Loading products...</div>';
+                return;
+            }
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<div class="no-products">No products found</div>';
+                return;
+            }
+
+            container.innerHTML = filteredProducts.map(product => {
+                const qty = quantities[product.id] || 0;
+                return `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">€${product.price.toFixed(2)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <input type="number" 
+                                   class="qty-input" 
+                                   value="${qty}" 
+                                   min="0" 
+                                   onchange="updateQuantity(${product.id}, this.value)"
+                                   oninput="updateQuantity(${product.id}, this.value)">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateQuantity(productId, value) {
+            const qty = Math.max(0, parseInt(value) || 0);
+            quantities[productId] = qty;
+            calculateTotal();
+            saveData(false);
+        }
+
+        function filterProducts() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            filteredProducts = products.filter(p => 
+                p.name.toLowerCase().includes(search)
+            );
+            renderProducts();
+        }
+
+        function calculateTotal() {
+            let grandTotal = 0;
+            products.forEach(product => {
+                const qty = quantities[product.id] || 0;
+                grandTotal += qty * product.price;
+            });
+            document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+        }
+
+        function saveData(showAlert = false) {
+            const data = {
+                customerName: document.getElementById('customerName').value,
+                customerAddress: document.getElementById('customerAddress').value,
+                comments: document.getElementById('comments').value,
+                quantities: quantities
+            };
+
+            document.cookie = `invoiceData=${encodeURIComponent(JSON.stringify(data))}; max-age=31536000; path=/`;
+            if (showAlert) {
+                alert('Data saved successfully! ✓');
+            }
+        }
+
+        function loadData() {
+            const cookies = document.cookie.split(';');
+            const invoiceCookie = cookies.find(c => c.trim().startsWith('invoiceData='));
+            
+            if (invoiceCookie) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(invoiceCookie.split('=')[1]));
+                    document.getElementById('customerName').value = data.customerName || '';
+                    document.getElementById('customerAddress').value = data.customerAddress || '';
+                    document.getElementById('comments').value = data.comments || '';
+                    quantities = data.quantities || {};
+                    renderProducts();
+                    calculateTotal();
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                }
+            }
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.cookie = 'invoiceData=; max-age=0; path=/';
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerAddress').value = '';
+                document.getElementById('comments').value = '';
+                document.getElementById('searchInput').value = '';
+                quantities = {};
+                filteredProducts = [...products];
+                renderProducts();
+                calculateTotal();
+            }
+        }
+
+        function openEditWebsite() {
+            // Opens Google Sheets for editing products
+            window.open('https://docs.google.com/spreadsheets/d/1dPq_0O6YzCf_oGunG4wqSU-2OHQuGZoWURhQ20Lll-4/edit?usp=sharing', '_blank');
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            generateProfessionalInvoice(pdf);
+            pdf.save('invoice-nimo.pdf');
+        }
+
+        function generateProfessionalInvoice(pdf) {
+            const pageWidth = 210;
+            const margin = 15;
+            let yPos = 20;
+            
+            // Company Header
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('NIMO', margin, yPos);
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            yPos += 6;
+            pdf.text('Engelselei 9', margin, yPos);
+            yPos += 5;
+            pdf.text('2140 Antwerpen', margin, yPos);
+            yPos += 5;
+            pdf.text('Tel: 03-636 20 98', margin, yPos);
+            yPos += 5;
+            pdf.text('GSM: 0465 59 81 98', margin, yPos);
+            yPos += 5;
+            pdf.text('WhatsApp: 0032465598198', margin, yPos);
+            yPos += 5;
+            pdf.text('BTW: BE0781.457.437', margin, yPos);
+            yPos += 5;
+            pdf.text('Email: hnhworld@yahoo.com', margin, yPos);
+            
+            // Invoice Title
+            yPos = 20;
+            pdf.setFontSize(18);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('FACTUUR', pageWidth - margin - 40, yPos);
+            
+            // Invoice Details (right side)
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            yPos += 10;
+            const invoiceNumber = 'INV-' + Date.now();
+            const currentDate = new Date().toLocaleDateString('nl-NL');
+            pdf.text('Factuur Nr: ' + invoiceNumber, pageWidth - margin - 60, yPos);
+            yPos += 5;
+            pdf.text('Datum: ' + currentDate, pageWidth - margin - 60, yPos);
+            
+            // Customer Details
+            yPos = 65;
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Klant:', margin, yPos);
+            pdf.setFont(undefined, 'normal');
+            yPos += 6;
+            const customerName = document.getElementById('customerName').value || 'M-PRESS BVBA';
+            const customerAddress = document.getElementById('customerAddress').value || 'Sint-jorispoort 32, 2000 Antwerpen';
+            pdf.text(customerName, margin, yPos);
+            yPos += 5;
+            pdf.text(customerAddress, margin, yPos);
+            
+            // Table Header
+            yPos += 15;
+            pdf.setFillColor(240, 240, 240);
+            pdf.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
+            
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('Artikel Nr', margin + 2, yPos);
+            pdf.text('Omschrijving', margin + 25, yPos);
+            pdf.text('Aantal', pageWidth - margin - 65, yPos);
+            pdf.text('Prijs', pageWidth - margin - 45, yPos);
+            pdf.text('Bedrag', pageWidth - margin - 22, yPos);
+            
+            // Line under header
+            yPos += 2;
+            pdf.setLineWidth(0.5);
+            pdf.line(margin, yPos, pageWidth - margin, yPos);
+            
+            // Products
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            
+            let itemNumber = 1;
+            let total = 0;
+            
+            products.forEach(product => {
+                const qty = quantities[product.id] || 0;
+                if (qty > 0) {
+                    const itemTotal = qty * product.price;
+                    total += itemTotal;
+                    
+                    // Check if we need a new page
+                    if (yPos > 250) {
+                        pdf.addPage();
+                        yPos = 20;
+                    }
+                    
+                    const articleNr = String(itemNumber).padStart(4, '0');
+                    pdf.text(articleNr, margin + 2, yPos);
+                    
+                    // Wrap long product names
+                    const maxWidth = 85;
+                    const lines = pdf.splitTextToSize(product.name, maxWidth);
+                    pdf.text(lines, margin + 25, yPos);
+                    
+                    pdf.text(String(qty), pageWidth - margin - 63, yPos);
+                    pdf.text('€' + product.price.toFixed(2), pageWidth - margin - 43, yPos);
+                    pdf.text('€' + itemTotal.toFixed(2), pageWidth - margin - 2, yPos, { align: 'right' });
+                    
+                    yPos += lines.length * 5 + 2;
+                    itemNumber++;
+                }
+            });
+            
+            // Total Section
+            yPos += 10;
+            pdf.setLineWidth(0.5);
+            pdf.line(pageWidth - margin - 60, yPos, pageWidth - margin, yPos);
+            
+            yPos += 8;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(14);
+            pdf.text('Total :', pageWidth - margin - 60, yPos);
+            pdf.text('€' + total.toFixed(2) + ' EUR', pageWidth - margin - 5, yPos, { align: 'right' });
+            
+            // Comments
+            const comments = document.getElementById('comments').value;
+            if (comments) {
+                yPos += 15;
+                pdf.setFontSize(10);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Opmerkingen:', margin, yPos);
+                yPos += 5;
+                pdf.setFont(undefined, 'normal');
+                const commentLines = pdf.splitTextToSize(comments, pageWidth - 2 * margin);
+                pdf.text(commentLines, margin, yPos);
+            }
+            
+            // Footer
+            yPos = 280;
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, 'italic');
+            pdf.text('Bedankt voor uw bestelling!', pageWidth / 2, yPos, { align: 'center' });
+        }
+
+        async function shareInvoice() {
+            if (navigator.share) {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                generateProfessionalInvoice(pdf);
+                const pdfBlob = pdf.output('blob');
+                
+                const file = new File([pdfBlob], 'invoice-nimo.pdf', { type: 'application/pdf' });
+                
+                try {
+                    await navigator.share({
+                        title: 'Invoice - Nimo',
+                        text: 'Please find the invoice attached',
+                        files: [file]
+                    });
+                } catch (err) {
+                    console.log('Share cancelled or not supported');
+                }
+            } else {
+                alert('Sharing is not supported on this device. Please use Download instead.');
+            }
+        }
+
+        // Initialize: Load products from sheet, then load saved data
+        loadProductsFromSheet().then(() => {
+            loadData();
+        });
+    </script>
+</body>
+</html>
