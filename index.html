@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice System - Nimo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&family=Dosis:wght@200..800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -14,9 +18,10 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: 'Dosis', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             background: #e8ecf1;
             min-height: 100vh;
+            padding-bottom: 100px;
         }
 
         .header {
@@ -26,6 +31,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #e5e7eb;
+            position: relative;
         }
 
         .company-name {
@@ -233,11 +239,200 @@
             font-size: 18px;
         }
 
+        /* Radial Menu - Sunflower Effect */
+        .radial-menu-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 998;
+        }
+
+        .radial-menu-trigger {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radial-menu-trigger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.6);
+        }
+
+        .radial-menu-trigger.active {
+            transform: rotate(45deg);
+        }
+
+        .radial-menu-items {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .radial-menu-item {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .radial-menu-items.active .radial-menu-item {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(1) {
+            bottom: 90px;
+            left: calc(50% - 80px);
+            transition-delay: 0.05s;
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(2) {
+            bottom: 110px;
+            left: 50%;
+            transition-delay: 0.1s;
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(3) {
+            bottom: 90px;
+            left: calc(50% + 80px);
+            transition-delay: 0.15s;
+        }
+
+        .radial-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: #2563eb;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radial-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 16px 20px;
+            font-size: 16px;
+            color: #374151;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dropdown-item svg {
+            width: 24px;
+            height: 24px;
+            color: #2563eb;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+        }
+
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .catalog-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .catalog-table th, .catalog-table td {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .catalog-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
         @media print {
             body {
                 background: white;
             }
-            .header-icons {
+            .header-icons, .radial-menu-container {
                 display: none !important;
             }
             .search-container {
@@ -308,6 +503,35 @@
             .input-field, .search-input, .comments-textarea {
                 font-size: 16px;
             }
+
+            /* Mobile Side Menu */
+            .dropdown-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;           /* ← Changed from left to right */
+        left: auto;             /* ← Important: override any left value */
+        width: 80%;
+        max-width: 320px;
+        height: 100%;
+        background: white;
+        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+        transition: right 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        z-index: 1000;
+    }
+
+    .dropdown-menu.active {
+        right: 0;               /* ← Slides in from the right */
+    }
+
+    /* Optional dark overlay when menu is open */
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 999;
+    }
         }
     </style>
 </head>
@@ -321,22 +545,79 @@
                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
             </button>
-            <button class="icon-btn" onclick="downloadPDF()" title="Download">
+              <button class="icon-btn" onclick="downloadPDF()" title="Download">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                 </svg>
             </button>
-            <button class="icon-btn" onclick="shareInvoice()" title="Share">
+             <button class="icon-btn" onclick="shareInvoice()" title="Share">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                     <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
                 </svg>
             </button>
-            <button class="icon-btn delete" onclick="clearData()" title="Clear All">
+            <!-- <button class="icon-btn delete" onclick="clearData()" title="Clear All">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            </button> -->
+            <button class="icon-btn" onclick="toggleMenu()" title="Menu">
+                <span class="menu-icon">☰</span>
+            </button>
+        </div>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-item" onclick="showProfile()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                1. Profile
+            </div>
+            <div class="dropdown-item" onclick="editData()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                2. Edit Data
+            </div>
+            <div class="dropdown-item" onclick="showCatalog()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                3. Catalog
+            </div>
+            <div class="dropdown-item" onclick="showContact()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+                4. Contact
+            </div>
+        </div>
+    </div>
+
+    <!-- Radial Menu (Sunflower Button) -->
+    <div class="radial-menu-container">
+        <button class="radial-menu-trigger" id="radialTrigger" onclick="toggleRadialMenu()">+</button>
+        <div class="radial-menu-items" id="radialMenu">
+            <button class="radial-menu-item radial-btn" onclick="saveData(true); toggleRadialMenu();" title="Save">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
                 </svg>
             </button>
+            <button class="radial-menu-item radial-btn" onclick="shareInvoice(); toggleRadialMenu();" title="Share">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+                </svg>
+            </button>
+            <!-- <button class="radial-menu-item radial-btn" onclick="downloadPDF(); toggleRadialMenu();" title="Download">⬇️</button> -->
+            <button class="radial-menu-item radial-btn" onclick="downloadPDF(); toggleRadialMenu();" title="Download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+                 
+            </button>
+             
         </div>
     </div>
 
@@ -348,7 +629,12 @@
 
         <div class="card">
             <div class="search-container">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+  <circle cx="11" cy="11" r="8"></circle>
+  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+</svg>
+                </span>
                 <input type="text" class="search-input" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
             </div>
 
@@ -365,13 +651,48 @@
         </div>
     </div>
 
+    <!-- Modals -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
+            <h2>Profile</h2>
+            <p id="profileInfo"></p>
+        </div>
+    </div>
+
+    <div class="modal" id="catalogModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('catalogModal')">&times;</span>
+            <h2>Catalog</h2>
+            <table class="catalog-table" id="catalogTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('contactModal')">&times;</span>
+            <h2>Contact</h2>
+            <p>Developer Contact Info:</p>
+            <p>Email: dev@example.com</p>
+            <p>Phone: +123-456-7890</p>
+            <!-- Add actual dev contact info here -->
+        </div>
+    </div>
+
     <script>
         let products = [];
         let filteredProducts = [];
         let quantities = {};
         let isLoadingProducts = true;
 
-        // Load products from Google Sheets
         async function loadProductsFromSheet() {
             try {
                 const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTsQ5pAZQYiTW4HDiosBT8XyILxfybIFf2YCN43D-4FB0Fgb3sI3DINwZM9E15GP_81RbwuUmQH4L8P/pub?gid=588089457&single=true&output=csv';
@@ -379,12 +700,10 @@
                 const response = await fetch(sheetUrl);
                 const csvText = await response.text();
                 
-                // Parse CSV - Column A = Name, Column B = Price
                 const rows = csvText.split('\n').filter(row => row.trim());
                 
                 products = [];
                 rows.forEach((row, index) => {
-                    // Handle CSV parsing with quoted values
                     const match = row.match(/(?:^|,)(?:"([^"]*)"|([^,]*))/g);
                     if (match && match.length >= 2) {
                         const nameRaw = match[0].replace(/^,?"?|"?$/g, '').trim();
@@ -521,8 +840,33 @@
         }
 
         function openEditWebsite() {
-            // Opens Google Sheets for editing products
             window.open('https://docs.google.com/spreadsheets/d/1dPq_0O6YzCf_oGunG4wqSU-2OHQuGZoWURhQ20Lll-4/edit?usp=sharing', '_blank');
+        }
+
+        function toggleRadialMenu() {
+            const trigger = document.getElementById('radialTrigger');
+            const menu = document.getElementById('radialMenu');
+            
+            trigger.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+
+        function generateInvoiceNumber() {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `${year}${month}${day}-${hours}${minutes}${seconds}-${randomPart}`;
+        }
+
+        function getFilename() {
+            const customerName = document.getElementById('customerName').value.trim() || 'invoice';
+            const invoiceNumber = generateInvoiceNumber();
+            return `${customerName.replace(/\s+/g, '_')}-${invoiceNumber}.pdf`;
         }
 
         async function downloadPDF() {
@@ -530,147 +874,7 @@
             const pdf = new jsPDF('p', 'mm', 'a4');
             
             generateProfessionalInvoice(pdf);
-            pdf.save('invoice-nimo.pdf');
-        }
-
-        function generateProfessionalInvoice(pdf) {
-            const pageWidth = 210;
-            const margin = 15;
-            let yPos = 20;
-            
-            // Company Header
-            pdf.setFontSize(16);
-            pdf.setFont(undefined, 'bold');
-            pdf.text('NIMO', margin, yPos);
-            
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, 'normal');
-            yPos += 6;
-            pdf.text('Engelselei 9', margin, yPos);
-            yPos += 5;
-            pdf.text('2140 Antwerpen', margin, yPos);
-            yPos += 5;
-            pdf.text('Tel: 03-636 20 98', margin, yPos);
-            yPos += 5;
-            pdf.text('GSM: 0465 59 81 98', margin, yPos);
-            yPos += 5;
-            pdf.text('WhatsApp: 0032465598198', margin, yPos);
-            yPos += 5;
-            pdf.text('BTW: BE0781.457.437', margin, yPos);
-            yPos += 5;
-            pdf.text('Email: hnhworld@yahoo.com', margin, yPos);
-            
-            // Invoice Title
-            yPos = 20;
-            pdf.setFontSize(18);
-            pdf.setFont(undefined, 'bold');
-            pdf.text('FACTUUR', pageWidth - margin - 40, yPos);
-            
-            // Invoice Details (right side)
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, 'normal');
-            yPos += 10;
-            const invoiceNumber = 'INV-' + Date.now();
-            const currentDate = new Date().toLocaleDateString('nl-NL');
-            pdf.text('Factuur Nr: ' + invoiceNumber, pageWidth - margin - 60, yPos);
-            yPos += 5;
-            pdf.text('Datum: ' + currentDate, pageWidth - margin - 60, yPos);
-            
-            // Customer Details
-            yPos = 65;
-            pdf.setFont(undefined, 'bold');
-            pdf.text('Klant:', margin, yPos);
-            pdf.setFont(undefined, 'normal');
-            yPos += 6;
-            const customerName = document.getElementById('customerName').value || 'M-PRESS BVBA';
-            const customerAddress = document.getElementById('customerAddress').value || 'Sint-jorispoort 32, 2000 Antwerpen';
-            pdf.text(customerName, margin, yPos);
-            yPos += 5;
-            pdf.text(customerAddress, margin, yPos);
-            
-            // Table Header
-            yPos += 15;
-            pdf.setFillColor(240, 240, 240);
-            pdf.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
-            
-            pdf.setFont(undefined, 'bold');
-            pdf.setFontSize(12);
-            pdf.text('Artikel Nr', margin + 2, yPos);
-            pdf.text('Omschrijving', margin + 25, yPos);
-            pdf.text('Aantal', pageWidth - margin - 65, yPos);
-            pdf.text('Prijs', pageWidth - margin - 45, yPos);
-            pdf.text('Bedrag', pageWidth - margin - 22, yPos);
-            
-            // Line under header
-            yPos += 2;
-            pdf.setLineWidth(0.5);
-            pdf.line(margin, yPos, pageWidth - margin, yPos);
-            
-            // Products
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
-            
-            let itemNumber = 1;
-            let total = 0;
-            
-            products.forEach(product => {
-                const qty = quantities[product.id] || 0;
-                if (qty > 0) {
-                    const itemTotal = qty * product.price;
-                    total += itemTotal;
-                    
-                    // Check if we need a new page
-                    if (yPos > 250) {
-                        pdf.addPage();
-                        yPos = 20;
-                    }
-                    
-                    const articleNr = String(itemNumber).padStart(4, '0');
-                    pdf.text(articleNr, margin + 2, yPos);
-                    
-                    // Wrap long product names
-                    const maxWidth = 85;
-                    const lines = pdf.splitTextToSize(product.name, maxWidth);
-                    pdf.text(lines, margin + 25, yPos);
-                    
-                    pdf.text(String(qty), pageWidth - margin - 63, yPos);
-                    pdf.text('€' + product.price.toFixed(2), pageWidth - margin - 43, yPos);
-                    pdf.text('€' + itemTotal.toFixed(2), pageWidth - margin - 2, yPos, { align: 'right' });
-                    
-                    yPos += lines.length * 5 + 2;
-                    itemNumber++;
-                }
-            });
-            
-            // Total Section
-            yPos += 10;
-            pdf.setLineWidth(0.5);
-            pdf.line(pageWidth - margin - 60, yPos, pageWidth - margin, yPos);
-            
-            yPos += 8;
-            pdf.setFont(undefined, 'bold');
-            pdf.setFontSize(14);
-            pdf.text('Total :', pageWidth - margin - 60, yPos);
-            pdf.text('€' + total.toFixed(2) + ' EUR', pageWidth - margin - 5, yPos, { align: 'right' });
-            
-            // Comments
-            const comments = document.getElementById('comments').value;
-            if (comments) {
-                yPos += 15;
-                pdf.setFontSize(10);
-                pdf.setFont(undefined, 'bold');
-                pdf.text('Opmerkingen:', margin, yPos);
-                yPos += 5;
-                pdf.setFont(undefined, 'normal');
-                const commentLines = pdf.splitTextToSize(comments, pageWidth - 2 * margin);
-                pdf.text(commentLines, margin, yPos);
-            }
-            
-            // Footer
-            yPos = 280;
-            pdf.setFontSize(9);
-            pdf.setFont(undefined, 'italic');
-            pdf.text('Bedankt voor uw bestelling!', pageWidth / 2, yPos, { align: 'center' });
+            pdf.save(getFilename());
         }
 
         async function shareInvoice() {
@@ -681,7 +885,7 @@
                 generateProfessionalInvoice(pdf);
                 const pdfBlob = pdf.output('blob');
                 
-                const file = new File([pdfBlob], 'invoice-nimo.pdf', { type: 'application/pdf' });
+                const file = new File([pdfBlob], getFilename(), { type: 'application/pdf' });
                 
                 try {
                     await navigator.share({
@@ -697,10 +901,205 @@
             }
         }
 
-        // Initialize: Load products from sheet, then load saved data
+        function generateProfessionalInvoice(pdf) {
+            const pageWidth = 210;
+            const margin = 15;
+            let yPos = 20;
+            
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('NIMO', margin, yPos);
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            yPos += 6;
+            pdf.text('Engelei 19', margin, yPos);
+            yPos += 5;
+            pdf.text('3650 Antwerpen', margin, yPos);
+            yPos += 5;
+            pdf.text('Tel: 03-636 20 98', margin, yPos);
+            yPos += 5;
+            pdf.text('GSM: 0465 59 81 98', margin, yPos);
+            yPos += 5;
+            pdf.text('WhatsApp: 0032465598198', margin, yPos);
+            yPos += 5;
+            pdf.text('Email: hnhworld@yahoo.com', margin, yPos);
+            
+            yPos = 20;
+            pdf.setFontSize(18);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('FACTUUR', pageWidth - margin - 40, yPos);
+            
+            const invoiceNumber = generateInvoiceNumber();
+            // yPos += 8;
+            // pdf.setFontSize(12);
+            
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            yPos += 10;
+            const currentDate = new Date().toLocaleDateString('nl-NL');
+            pdf.text('Factuur Nr: ' + invoiceNumber, pageWidth - margin - 60, yPos);
+            yPos += 5;
+            pdf.text('Datum: ' + currentDate, pageWidth - margin - 60, yPos);
+            
+            yPos = 65;
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Klant:', margin, yPos);
+            pdf.setFont(undefined, 'normal');
+            yPos += 6;
+            const customerName = document.getElementById('customerName').value || 'NACHT-WINCHEL BVBA';
+            const customerAddress = document.getElementById('customerAddress').value || 'address';
+            pdf.text(customerName, margin, yPos);
+            yPos += 5;
+            pdf.text(customerAddress, margin, yPos);
+            
+            yPos += 15;
+            pdf.setFillColor(240, 240, 240);
+            pdf.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
+            
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('Artikel Nr', margin + 2, yPos);
+            pdf.text('Omschrijving', margin + 25, yPos);
+            pdf.text('Aantal', pageWidth - margin - 65, yPos);
+            pdf.text('Prijs', pageWidth - margin - 45, yPos);
+            pdf.text('Bedrag', pageWidth - margin - 22, yPos);
+            
+            yPos += 2;
+            pdf.setLineWidth(0.5);
+            pdf.line(margin, yPos, pageWidth - margin, yPos);
+            
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            
+            let itemNumber = 1;
+            let total = 0;
+            
+            products.forEach(product => {
+                const qty = quantities[product.id] || 0;
+                if (qty > 0) {
+                    const itemTotal = qty * product.price;
+                    total += itemTotal;
+                    
+                    if (yPos > 250) {
+                        pdf.addPage();
+                        yPos = 20;
+                    }
+                    
+                    const articleNr = String(itemNumber).padStart(4, '0');
+                    pdf.text(articleNr, margin + 2, yPos);
+                    
+                    const maxWidth = 85;
+                    const lines = pdf.splitTextToSize(product.name, maxWidth);
+                    pdf.text(lines, margin + 25, yPos);
+                    
+                    pdf.text(String(qty), pageWidth - margin - 63, yPos);
+                    pdf.text('€' + product.price.toFixed(2), pageWidth - margin - 43, yPos);
+                    pdf.text('€' + itemTotal.toFixed(2), pageWidth - margin - 2, yPos, { align: 'right' });
+                    
+                    yPos += lines.length * 5 + 2;
+                    itemNumber++;
+                }
+            });
+            
+            yPos += 10;
+            pdf.setLineWidth(0.5);
+            pdf.line(pageWidth - margin - 60, yPos, pageWidth - margin, yPos);
+            
+            yPos += 8;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(14);
+            pdf.text('Total :', pageWidth - margin - 60, yPos);
+            pdf.text('€' + total.toFixed(2) + ' EUR', pageWidth - margin - 5, yPos, { align: 'right' });
+            
+            const comments = document.getElementById('comments').value;
+            if (comments) {
+                yPos += 15;
+                pdf.setFontSize(10);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Opmerkingen:', margin, yPos);
+                yPos += 5;
+                pdf.setFont(undefined, 'normal');
+                const commentLines = pdf.splitTextToSize(comments, pageWidth - 2 * margin);
+                pdf.text(commentLines, margin, yPos);
+            }
+            
+            yPos = 280;
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, 'italic');
+            pdf.text('Bedankt voor uw bestelling!', pageWidth / 2, yPos, { align: 'center' });
+        }
+
+        // Menu Functions
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        function showProfile() {
+            const customerName = document.getElementById('customerName').value || 'N/A';
+            const customerAddress = document.getElementById('customerAddress').value || 'N/A';
+            const comments = document.getElementById('comments').value || 'N/A';
+            const profileInfo = `
+                Customer Name: ${customerName}<br>
+                Address: ${customerAddress}<br>
+                Comments: ${comments}
+            `;
+            document.getElementById('profileInfo').innerHTML = profileInfo;
+            document.getElementById('profileModal').style.display = 'flex';
+            toggleMenu();
+        }
+
+        function editData() {
+            openEditWebsite();
+            toggleMenu();
+        }
+
+        function showCatalog() {
+            const tableBody = document.querySelector('#catalogTable tbody');
+            tableBody.innerHTML = products.map(product => `
+                <tr>
+                    <td>${product.name}</td>
+                    <td>€${product.price.toFixed(2)}</td>
+                </tr>
+            `).join('');
+            document.getElementById('catalogModal').style.display = 'flex';
+            toggleMenu();
+        }
+        function toggleMenu() {
+        const menu = document.getElementById('dropdownMenu');
+        const body = document.body;
+        
+        menu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+        }
+        function showContact() {
+            document.getElementById('contactModal').style.display = 'flex';
+            toggleMenu();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modals and menu when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            if (!event.target.closest('.icon-btn') && !event.target.closest('.dropdown-menu')) {
+                document.getElementById('dropdownMenu').classList.remove('active');
+            }
+        }
+
         loadProductsFromSheet().then(() => {
             loadData();
         });
+        
     </script>
 </body>
 </html>
