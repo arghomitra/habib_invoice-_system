@@ -1099,9 +1099,11 @@
         loadProductsFromSheet().then(() => {
             loadData();
         });
-       if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/habib_invoice-_system/sw.js');
 }
+
+       
 
 
     </script>
