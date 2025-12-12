@@ -5,7 +5,7 @@ const FILES_TO_CACHE = [
   '/habib_invoice-_system/manifest.json',
   '/habib_invoice-_system/sw.js',
   '/habib_invoice-_system/icon-192.png',
-  '/habib_invoice-_system/icon-512.png'
+  '/habib_invoice-_system/icon-512.gif'
 ];
 
 self.addEventListener('install', event => {
@@ -23,3 +23,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
