@@ -1,11 +1,10 @@
 {
-  "name": "My Awesome PWA",
-  "short_name": "MyPWA",
+  "name": "Nimo Invoice System",
+  "short_name": "Nimo",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "description": "A demo Progressive Web App.",
+  "theme_color": "#2563eb",
   "icons": [
     {
       "src": "/image.png",
