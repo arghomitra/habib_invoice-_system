@@ -1123,7 +1123,7 @@ function toggleRadialMenu() {
             pdf.setFont(undefined, 'normal');
             pdf.setTextColor(100, 100, 100);
             yPos += 6;
-            pdf.text('YOUR TAGLINE HERE', margin, yPos);
+            // pdf.text('YOUR TAGLINE HERE', margin, yPos);
             
             // Invoice title (right side)
             pdf.setFontSize(28);
@@ -1135,11 +1135,11 @@ function toggleRadialMenu() {
             pdf.setFontSize(9);
             pdf.setFont(undefined, 'normal');
             pdf.setTextColor(60, 60, 60);
-            pdf.text('Invoice No. #' + invoiceNumber, pageWidth - margin - 45, 32);
+            pdf.text('Invoice No: ' + invoiceNumber, pageWidth - margin - 45, 32);
             
             const currentDate = new Date().toLocaleDateString('nl-NL');
             pdf.text('Invoice Date: ' + currentDate, pageWidth - margin - 45, 37);
-            pdf.text('Issue Date: ' + currentDate, pageWidth - margin - 45, 42);
+            // pdf.text('Issue Date: ' + currentDate, pageWidth - margin - 45, 42);
             
             // Customer section
             yPos = 60;
@@ -1237,11 +1237,11 @@ function toggleRadialMenu() {
             pdf.setTextColor(60, 60, 60);
             pdf.text('€' + subtotal.toFixed(2), pageWidth - margin - 2, yPos, { align: 'right' });
             
-            yPos += 5;
-            pdf.setTextColor(100, 100, 100);
-            pdf.text('Tax: Vat (0%):', summaryX, yPos);
-            pdf.setTextColor(60, 60, 60);
-            pdf.text('€0.00', pageWidth - margin - 2, yPos, { align: 'right' });
+            // yPos += 5;
+            // pdf.setTextColor(100, 100, 100);
+            // pdf.text('Tax: Vat (0%):', summaryX, yPos);
+            // pdf.setTextColor(60, 60, 60);
+            // pdf.text('€0.00', pageWidth - margin - 2, yPos, { align: 'right' });
             
             yPos += 5;
             pdf.setTextColor(100, 100, 100);
