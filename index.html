@@ -1250,10 +1250,28 @@ function toggleRadialMenu() {
             pdf.text('Bankrekening: BE00 0000 0000 0000', pageWidth - margin, footerY, { align: 'right' });
         }
         
-        function shareInvoice() {
-            // Placeholder for a share functionality, e.g., generating a temporary link or opening an email client.
-            // In a real application, this would require server-side logic to upload and generate a shareable PDF/link.
-            alert('Share functionality is a placeholder. In a real system, this would generate a shareable link or email the invoice.');
+        async function shareInvoice() {
+            if (navigator.share) {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                generateProfessionalInvoice(pdf);
+                const pdfBlob = pdf.output('blob');
+                
+                const file = new File([pdfBlob], getFilename(), { type: 'application/pdf' });
+                
+                try {
+                    await navigator.share({
+                        title: 'Invoice - Nimo',
+                        text: 'Please find the invoice attached',
+                        files: [file]
+                    });
+                } catch (err) {
+                    console.log('Share cancelled or not supported');
+                }
+            } else {
+                alert('Sharing is not supported on this device. Please use Download instead.');
+            }
         }
 
         // Initial setup
