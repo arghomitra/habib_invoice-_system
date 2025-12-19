@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="manifest" href="/habib_invoice-_system/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice System - Nimo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&family=Dosis:wght@200..800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #e8ecf1;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .company-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: background 0.2s;
+            color: #374151;
+        }
+
+        .icon-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .icon-btn.delete {
+            background: #ef4444;
+            color: white;
+            border-radius: 12px;
+        }
+
+        .icon-btn.delete:hover {
+            background: #dc2626;
+        }
+
+        .menu-icon {
+            color: #2563eb;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* Side Menu */
+        .side-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 999;
+        }
+
+        .side-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .side-menu.active {
+            right: 0;
+        }
+
+        .menu-header {
+            padding: 20px;
+            background: #2563eb;
+            color: white;
+        }
+
+        .menu-header h2 {
+            font-size: 24px;
+        }
+
+        .menu-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-items {
+            list-style: none;
+        }
+
+        .menu-item {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .menu-item button {
+            width: 100%;
+            padding: 18px 20px;
+            border: none;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            color: #374151;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item button:hover {
+            background: #f3f4f6;
+        }
+
+        .menu-item-icon {
+            font-size: 20px;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .page-header {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            font-size: 17px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+            color: #6b7280;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 28px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 26px;
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 20px 18px 58px;
+            border: 3px solid #3b82f6;
+            border-radius: 18px;
+            font-size: 19px;
+            color: #111827;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .product-item {
+            padding: 22px 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 19px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .product-price {
+            font-size: 17px;
+            color: #6b7280;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .qty-input {
+            width: 70px;
+            height: 48px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            color: #111827;
+            transition: all 0.2s;
+        }
+
+        .qty-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .total-section {
+            text-align: right;
+            padding: 28px 0 12px 0;
+        }
+
+        .total-label {
+            font-size: 19px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: -0.02em;
+        }
+
+        .comments-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 18px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            font-size: 17px;
+            font-family: inherit;
+            resize: vertical;
+            color: #6b7280;
+        }
+
+        .comments-textarea:focus {
+            outline: none;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .comments-textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .info-section {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .info-value {
+            color: #111827;
+        }
+
+        select.input-field {
+            cursor: pointer;
+        }
+
+        .contact-info {
+            background: #dbeafe;
+            padding: 20px;
+            border-radius: 14px;
+            margin-top: 20px;
+        }
+
+        .contact-info h3 {
+            color: #1e40af;
+            margin-bottom: 12px;
+        }
+
+        .contact-info p {
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+.radial-menu-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 998;
+        }
+
+        .radial-menu-trigger {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radial-menu-trigger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.6);
+        }
+
+        .radial-menu-trigger.active {
+            transform: rotate(45deg);
+        }
+
+        .radial-menu-items {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .radial-menu-item {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .radial-menu-items.active .radial-menu-item {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(1) {
+            bottom: 90px;
+            left: calc(50% - 80px);
+            transition-delay: 0.05s;
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(2) {
+            bottom: 110px;
+            left: 50%;
+            transition-delay: 0.1s;
+        }
+
+        .radial-menu-items.active .radial-menu-item:nth-child(3) {
+            bottom: 90px;
+            left: calc(50% + 80px);
+            transition-delay: 0.15s;
+        }
+
+        .radial-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: #2563eb;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radial-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .header-icons {
+                display: none !important;
+            }
+            .search-container {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .company-name {
+                font-size: 28px;
+            }
+
+            .header {
+                padding: 14px 16px;
+            }
+
+            .header-icons {
+                gap: 6px;
+            }
+
+            .icon-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+
+            .side-menu {
+                width: 280px;
+                right: -280px;
+            }
+
+            .product-item {
+                flex-direction: row;
+                align-items: center;
+                padding: 18px 0;
+            }
+
+            .product-name {
+                font-size: 17px;
+            }
+
+            .product-price {
+                font-size: 15px;
+            }
+
+            .quantity-controls {
+                gap: 12px;
+            }
+
+            .qty-input {
+                width: 60px;
+                height: 42px;
+                font-size: 18px;
+            }
+
+            .total-amount {
+                font-size: 36px;
+            }
+
+            .input-field, .search-input, .comments-textarea {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name" onclick="location.href='indexv2.1.html';" style="cursor: pointer;">
+    Nimo
+</div>
+        <div class="header-icons">
+            <button class="icon-btn" onclick="downloadPDF()" title="Download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+            </button>
+            <button class="icon-btn" onclick="shareInvoice()" title="Share">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+                </svg>
+            </button>
+            <!-- <button class="icon-btn delete" onclick="clearData()" title="Clear All">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            </button> -->
+            <button class="icon-btn" onclick="toggleMenu()" title="Menu">
+                <span class="menu-icon">☰</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="side-menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <button class="menu-close" onclick="toggleMenu()">×</button>
+        </div>
+        <ul class="menu-items">
+            <li class="menu-item">
+    <button onclick="showPage('profile')">
+        <span class="menu-item-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </span>
+        Profile
+    </button>
+</li>
+<li class="menu-item">
+    <button onclick="openEditWebsite()">
+        <span class="menu-item-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
+        </span>
+        Edit Items
+    </button>
+</li>
+<li class="menu-item">
+    <button onclick="showPage('password')">
+        <span class="menu-item-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0110 0v4"></path>
+            </svg>
+        </span>
+        Change Password
+    </button>
+</li>
+<li class="menu-item">
+   <button type="button" onclick="location.href='pricing.html';" class="menu-button">
+    <span class="menu-item-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+    </span>
+    Pricing
+</button>
+</li>
+<li class="menu-item">
+    <button onclick="showPage('contact')">
+        <span class="menu-item-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+        </span>
+        Contact
+    </button>
+</li>
+<li class="menu-item">
+    <button onclick="printCatalog()">
+        <span class="menu-item-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+        </span>
+        Print Catalog
+    </button>
+</li>
+        </ul>
+    </div>
+
+    <div class="page active" id="invoicePage">
+        <div class="container" id="invoiceContent">
+            <div class="card">
+                <input type="text" class="input-field" id="customerName" placeholder="Name / Company Name" oninput="saveData(false)">
+                <input type="text" class="input-field" id="customerAddress" placeholder="Address" oninput="saveData(false)" style="margin-bottom: 0;">
+            </div>
+
+            <div class="card">
+                <div class="search-container">
+    <span class="search-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+    </span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
+</div>
+
+                <div id="productsList"></div>
+
+                <div class="total-section">
+                    <div class="total-label">Total</div>
+                    <div class="total-amount">€<span id="grandTotal">0.00</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <textarea class="comments-textarea" id="comments" placeholder="Additional comments..." oninput="saveData(false)"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="profilePage">
+        <div class="container">
+            <div class="card">
+                <h1 class="page-header">Profile</h1>
+                <div class="info-section">
+                    <div class="info-row">
+                        <span class="info-label">Company Name:</span>
+                        <span class="info-value">NIMO</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address:</span>
+                        <span class="info-value">Engelselei 9, 2140 Antwerpen</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tel:</span>
+                        <span class="info-value">03-636 20 98</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">GSM:</span>
+                        <span class="info-value">0465 59 81 98</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">WhatsApp:</span>
+                        <span class="info-value">0032465598198</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">BTW:</span>
+                        <span class="info-value">BE0781.457.437</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">hnhworld@yahoo.com</span>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="showPage('invoice')">Back to Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="passwordPage">
+        <div class="container">
+            <div class="card">
+                <h1 class="page-header">Change Password</h1>
+                <input type="password" class="input-field" placeholder="Current Password">
+                <input type="password" class="input-field" placeholder="New Password">
+                <input type="password" class="input-field" placeholder="Confirm New Password">
+                <button class="btn-primary" onclick="alert('Password changed successfully!'); showPage('invoice')">Change Password</button>
+                <button class="btn-primary" onclick="showPage('invoice')" style="background: #6b7280; margin-top: 10px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="contactPage">
+        <div class="container">
+            <div class="card">
+                <h1 class="page-header">Contact the Developer</h1>
+<p style="color: #6b7280; margin-bottom: 20px;">We value your input! Please use the form below to report a bug, suggest a feature, or ask a technical question directly to the development team.</p>
+
+<form action="https://formspree.io/f/xanrppyb" method="POST"> 
+    
+    <input type="text" class="input-field" id="contactName" name="Name" placeholder="Your Name" required>
+    
+    <input type="email" class="input-field" id="contactEmail" name="Email" placeholder="Your Email" required>
+    
+    <input type="text" class="input-field" id="contactSubject" name="Subject" placeholder="Subject" required>
+    
+    <select class="input-field" id="contactCategory" name="Category" required>
+        <option value="">Select Category</option>
+        <option value="Bug Report">Bug Report</option>
+        <option value="Feature Request">Feature Request</option>
+        <option value="General Question">General Question</option>
+        <option value="Other">Other</option>
+    </select>
+    
+    <textarea class="comments-textarea" id="contactMessage" name="Message" placeholder="Your message..." required></textarea>
+    
+    <button class="btn-primary" type="submit">Send Message</button>
+</form>
+
+                <div class="contact-info">
+                    <h3>Direct Contact</h3>
+                    <p><strong>Developer:</strong> Your Name</p>
+                    <p><strong>Email:</strong> developer@example.com</p>
+                    <p><strong>Phone:</strong> +32 123 456 789</p>
+                </div>
+
+                <button class="btn-primary" onclick="showPage('invoice')" style="background: #6b7280; margin-top: 20px;">Back to Invoice</button>
+            </div>
+        </div>
+    </div>
+    <!-- Radial Menu (Sunflower Button) -->
+<!-- <div class="radial-menu-container">
+    <button
+        class="radial-menu-trigger"
+        id="radialTrigger"
+        onclick="toggleRadialMenu()"
+        aria-label="Open menu">
+        +
+    </button> -->
+
+   <div class="radial-menu-container">
+        <button class="radial-menu-trigger" id="radialTrigger" onclick="toggleRadialMenu()">+</button>
+        <div class="radial-menu-items" id="radialMenu">
+            <!-- <button class="radial-menu-item radial-btn" onclick="clearData(); toggleRadialMenu();" title="Save">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            </button> -->
+            <button class="radial-menu-item radial-btn" onclick="clearData(); toggleRadialMenu();" title="Clear All">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            </button>
+            <button class="radial-menu-item radial-btn" onclick="shareInvoice(); toggleRadialMenu();" title="Share">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+                </svg>
+            </button>
+            <!-- <button class="radial-menu-item radial-btn" onclick="downloadPDF(); toggleRadialMenu();" title="Download">⬇️</button> -->
+            <button class="radial-menu-item radial-btn" onclick="downloadPDF(); toggleRadialMenu();" title="Download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+                 
+            </button>
+             
+        </div>
+    </div>
+
+
+    <script>
+        let products = [];
+        let filteredProducts = [];
+        let quantities = {};
+        let isLoadingProducts = true;
+        const { jsPDF } = window.jspdf;
+
+        // Load products from Google Sheets
+        async function loadProductsFromSheet() {
+            try {
+                const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTsQ5pAZQYiTW4HDiosBT8XyILxfybIFf2YCN43D-4FB0Fgb3sI3DINwZM9E15GP_81RbwuUmQH4L8P/pub?gid=588089457&single=true&output=csv';
+                
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                
+                const rows = csvText.split('\n').filter(row => row.trim());
+                
+                products = [];
+                rows.forEach((row, index) => {
+                    // Simple CSV parsing, might need a more robust parser for complex cases
+                    const columns = row.split(',').map(col => col.trim().replace(/^"|"$/g, ''));
+                    if (columns.length >= 2) {
+                        const name = columns[0];
+                        const price = parseFloat(columns[1]);
+                        
+                        if (name && !isNaN(price) && price > 0) {
+                            products.push({
+                                id: index + 1,
+                                name: name,
+                                price: price
+                            });
+                        }
+                    }
+                });
+
+                filteredProducts = [...products];
+                isLoadingProducts = false;
+                renderProducts();
+                loadData(); // Load data after products are available
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                isLoadingProducts = false;
+                document.getElementById('productsList').innerHTML = 
+                    '<div class="no-products">Error loading products. Please check your connection.</div>';
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            
+            if (isLoadingProducts) {
+                container.innerHTML = '<div class="no-products">Loading products...</div>';
+                return;
+            }
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<div class="no-products">No products found</div>';
+                return;
+            }
+
+            container.innerHTML = filteredProducts.map(product => {
+                const qty = quantities[product.id] || 0;
+                return `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">€${product.price.toFixed(2)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <input type="number" 
+                                    class="qty-input" 
+                                    value="${qty}" 
+                                    min="0" 
+                                    onchange="updateQuantity(${product.id}, this.value)"
+                                    oninput="updateQuantity(${product.id}, this.value)">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateQuantity(productId, value) {
+            const qty = Math.max(0, parseInt(value) || 0);
+            quantities[productId] = qty;
+            calculateTotal();
+            saveData(false);
+        }
+
+        function filterProducts() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            filteredProducts = products.filter(p => 
+                p.name.toLowerCase().includes(search)
+            );
+            renderProducts();
+        }
+
+        function calculateTotal() {
+            let grandTotal = 0;
+            products.forEach(product => {
+                const qty = quantities[product.id] || 0;
+                grandTotal += qty * product.price;
+            });
+            document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+        }
+
+        function saveData(showAlert = false) {
+            const data = {
+                customerName: document.getElementById('customerName').value,
+                customerAddress: document.getElementById('customerAddress').value,
+                comments: document.getElementById('comments').value,
+                quantities: quantities
+            };
+
+            document.cookie = `invoiceData=${encodeURIComponent(JSON.stringify(data))}; max-age=31536000; path=/`;
+            if (showAlert) {
+                alert('Data saved successfully! ✓');
+            }
+        }
+
+        function loadData() {
+            const cookies = document.cookie.split(';');
+            const invoiceCookie = cookies.find(c => c.trim().startsWith('invoiceData='));
+            
+            if (invoiceCookie) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(invoiceCookie.split('=')[1]));
+                    document.getElementById('customerName').value = data.customerName || '';
+                    document.getElementById('customerAddress').value = data.customerAddress || '';
+                    document.getElementById('comments').value = data.comments || '';
+                    quantities = data.quantities || {};
+                    renderProducts();
+                    calculateTotal();
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                }
+            }
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.cookie = 'invoiceData=; max-age=0; path=/';
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerAddress').value = '';
+                document.getElementById('comments').value = '';
+                document.getElementById('searchInput').value = '';
+                quantities = {};
+                filteredProducts = [...products];
+                renderProducts();
+                calculateTotal();
+            }
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+       
+function toggleRadialMenu() {
+            const trigger = document.getElementById('radialTrigger');
+            const menu = document.getElementById('radialMenu');
+            
+            trigger.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageName + 'Page').classList.add('active');
+            // Close menu when navigating
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            if(menu.classList.contains('active')) {
+                toggleMenu();
+            }
+        }
+
+        function openEditWebsite() {
+            window.open('https://docs.google.com/spreadsheets/d/1dPq_0O6YzCf_oGunG4wqSU-2OHQuGZoWURhQ20Lll-4/edit?usp=sharing', '_blank');
+            toggleMenu();
+        }
+
+        function printCatalog() {
+            window.print();
+            toggleMenu();
+        }
+
+        function submitContact() {
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const subject = document.getElementById('contactSubject').value;
+            const category = document.getElementById('contactCategory').value;
+            const message = document.getElementById('contactMessage').value;
+
+            if (!name || !email || !subject || !category || !message) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // In a real application, you would send this data to a server
+            // For this example, we'll just show an alert and clear the form.
+            alert('Thank you! Your message has been sent successfully.');
+            document.getElementById('contactName').value = '';
+            document.getElementById('contactEmail').value = '';
+            document.getElementById('contactSubject').value = '';
+            document.getElementById('contactCategory').value = '';
+            document.getElementById('contactMessage').value = '';
+        }
+
+        async function downloadPDF() {
+            // Re-import jspdf just in case it's not globally available after dynamic loading
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            generateProfessionalInvoice(pdf);
+            
+            // Generate a unique file name
+            const customerName = document.getElementById('customerName').value.trim() || 'Customer';
+            const date = new Date().toLocaleDateString('en-CA').replace(/-/g, ''); // YYYYMMDD
+            const fileName = `Invoice-${customerName}-${date}.pdf`;
+            
+            pdf.save(fileName);
+        }
+
+        function generateProfessionalInvoice(pdf) {
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 15;
+            let yPos = 20;
+            const lineHeight = 5;
+            const col1 = margin;
+            const col2 = 120; // Column for amounts
+
+            // --- Header: Nimo Information ---
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.setTextColor('#2563eb');
+            pdf.text('NIMO', col1, yPos);
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor('#000000');
+            yPos += lineHeight;
+            pdf.text('Engelselei 9, 2140 Antwerpen', col1, yPos);
+            yPos += lineHeight;
+            pdf.text('Tel: 03-636 20 98 | GSM: 0465 59 81 98', col1, yPos);
+            yPos += lineHeight;
+            pdf.text('BTW: BE0781.457.437 | Email: hnhworld@yahoo.com', col1, yPos);
+            yPos += lineHeight * 2;
+            
+            pdf.line(margin, yPos, pageWidth - margin, yPos); // Horizontal line
+
+            // --- Invoice Title and Date ---
+            yPos += 7;
+            pdf.setFontSize(20);
+            pdf.setFont(undefined, 'bold');
+            pdf.setTextColor('#111827');
+            pdf.text('FACTUUR', pageWidth - margin, yPos, { align: 'right' });
+
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor('#000000');
+            yPos += lineHeight;
+            pdf.text(`Datum: ${new Date().toLocaleDateString('en-GB')}`, pageWidth - margin, yPos, { align: 'right' });
+            yPos += lineHeight;
+            pdf.text(`Factuurnr: INV-${Date.now().toString().slice(-6)}`, pageWidth - margin, yPos, { align: 'right' }); // Placeholder number
+            yPos += lineHeight * 2;
+            
+            // --- Customer Information ---
+            const customerName = document.getElementById('customerName').value.trim() || 'N/A';
+            const customerAddress = document.getElementById('customerAddress').value.trim() || 'N/A';
+            
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Aan:', col1, yPos);
+            yPos += lineHeight;
+            pdf.setFont(undefined, 'normal');
+            pdf.text(customerName, col1, yPos);
+            yPos += lineHeight;
+            pdf.text(customerAddress, col1, yPos);
+            yPos += lineHeight * 2;
+            
+            // --- Items Table Header ---
+            pdf.setFillColor(230, 230, 230);
+            pdf.rect(margin, yPos, pageWidth - (2 * margin), 8, 'F');
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Product / Beschrijving', margin + 2, yPos + 5);
+            pdf.text('Prijs', 140, yPos + 5, { align: 'right' });
+            pdf.text('Aantal', 160, yPos + 5, { align: 'right' });
+            pdf.text('Totaal', pageWidth - margin - 2, yPos + 5, { align: 'right' });
+            yPos += 8;
+            
+            // --- Items Table Rows ---
+            pdf.setFont(undefined, 'normal');
+            let totalExclTax = 0;
+            const items = products
+                .filter(p => (quantities[p.id] || 0) > 0)
+                .map(p => ({
+                    ...p,
+                    qty: quantities[p.id],
+                    lineTotal: p.price * quantities[p.id]
+                }));
+
+            items.forEach(item => {
+                if (yPos > pageHeight - margin - 40) { // Check for page break
+                    pdf.addPage();
+                    yPos = margin;
+                    // Re-draw header on new page (optional, but good practice)
+                    pdf.setFillColor(230, 230, 230);
+                    pdf.rect(margin, yPos, pageWidth - (2 * margin), 8, 'F');
+                    pdf.setFontSize(10);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('Product / Beschrijving', margin + 2, yPos + 5);
+                    pdf.text('Prijs', 140, yPos + 5, { align: 'right' });
+                    pdf.text('Aantal', 160, yPos + 5, { align: 'right' });
+                    pdf.text('Totaal', pageWidth - margin - 2, yPos + 5, { align: 'right' });
+                    yPos += 8;
+                    pdf.setFont(undefined, 'normal');
+                }
+                
+                totalExclTax += item.lineTotal;
+                
+                yPos += 4;
+                pdf.text(item.name, margin + 2, yPos);
+                pdf.text(`€${item.price.toFixed(2)}`, 140, yPos, { align: 'right' });
+                pdf.text(item.qty.toString(), 160, yPos, { align: 'right' });
+                pdf.text(`€${item.lineTotal.toFixed(2)}`, pageWidth - margin - 2, yPos, { align: 'right' });
+                yPos += 4;
+                pdf.line(margin, yPos, pageWidth - margin, yPos);
+            });
+            
+            yPos += 5;
+
+            // --- Totals Section ---
+            const vatRate = 0.21; // Assuming 21% VAT/BTW in Belgium
+            const vatAmount = totalExclTax * vatRate;
+            const grandTotal = totalExclTax + vatAmount;
+
+            // Total Excl. VAT
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Totaal excl. BTW:', col2, yPos, { align: 'right' });
+            pdf.text(`€${totalExclTax.toFixed(2)}`, pageWidth - margin - 2, yPos, { align: 'right' });
+            yPos += lineHeight;
+
+            // VAT/BTW
+            pdf.text(`BTW (${(vatRate * 100).toFixed(0)}%):`, col2, yPos, { align: 'right' });
+            pdf.text(`€${vatAmount.toFixed(2)}`, pageWidth - margin - 2, yPos, { align: 'right' });
+            yPos += lineHeight + 1;
+            
+            pdf.line(col2 - 20, yPos, pageWidth - margin, yPos); // Line under VAT
+            
+            // Grand Total
+            yPos += 4;
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.setTextColor('#2563eb');
+            pdf.text('Totaal Incl. BTW:', col2, yPos, { align: 'right' });
+            pdf.text(`€${grandTotal.toFixed(2)}`, pageWidth - margin - 2, yPos, { align: 'right' });
+            pdf.setTextColor('#000000');
+            yPos += lineHeight + 5;
+
+            // --- Comments / Notes ---
+            const comments = document.getElementById('comments').value.trim();
+            if (comments) {
+                pdf.setFontSize(10);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Opmerkingen:', margin, yPos);
+                yPos += lineHeight;
+                pdf.setFont(undefined, 'normal');
+                // Use splitTextToSize for multi-line comments
+                const splitComments = pdf.splitTextToSize(comments, pageWidth - 2 * margin);
+                pdf.text(splitComments, margin, yPos);
+                yPos += splitComments.length * lineHeight;
+            }
+
+            // --- Footer ---
+            // Example: Terms/Bank Details (Placed near the bottom)
+            const footerY = pageHeight - margin;
+            pdf.setFontSize(8);
+            pdf.setFont(undefined, 'italic');
+            pdf.text('Gelieve binnen 30 dagen te betalen. Bedankt voor uw vertrouwen!', margin, footerY);
+            pdf.text('Bankrekening: BE00 0000 0000 0000', pageWidth - margin, footerY, { align: 'right' });
+        }
+        
+        function shareInvoice() {
+            // Placeholder for a share functionality, e.g., generating a temporary link or opening an email client.
+            // In a real application, this would require server-side logic to upload and generate a shareable PDF/link.
+            alert('Share functionality is a placeholder. In a real system, this would generate a shareable link or email the invoice.');
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date on initial load (optional: could be part of the invoice data if needed)
+            // document.getElementById('invoiceDate').value = new Date().toISOString().substring(0, 10);
+            
+            loadProductsFromSheet(); // This will call loadData() internally after products load
+        });
+        // Initial setup
+        loadProductsFromSheet();
+
+    </script>
+</body>
+</html>

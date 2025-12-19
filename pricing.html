@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans - Nimo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script> 
+    <style>
+        /* --- Palette 2 Colors (Re-defined for Clarity) --- */
+        :root {
+            --color-navy: #1C3D6E;        /* Primary Branding */
+            --color-teal: #1AA7A4;        /* CTA & Highlight */
+            --color-white: #FFFFFF;
+            --color-light-bg: #f4f6f9;    /* Page Background */
+            --color-medium-gray: #6C757D;
+            --color-charcoal: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Dosis', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: var(--color-light-bg); 
+            color: var(--color-charcoal);
+            line-height: 1.6;
+        }
+
+        .pricing-header {
+            text-align: center;
+            padding: 60px 20px 30px;
+        }
+
+        .pricing-header h1 {
+            font-size: 44px;
+            font-weight: 700;
+            color: var(--color-navy);
+            margin-bottom: 10px;
+        }
+
+        .pricing-header p {
+            font-size: 20px;
+            color: var(--color-medium-gray);
+        }
+
+        .plans-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .plan-card {
+            background: var(--color-white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Highlight the recommended plan */
+        .plan-card.featured {
+            border: 3px solid var(--color-teal);
+            box-shadow: 0 10px 25px rgba(26, 167, 164, 0.2);
+        }
+
+        .plan-card.featured .plan-header h2 {
+             color: var(--color-teal);
+        }
+
+        .plan-header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .plan-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-navy);
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--color-charcoal);
+            line-height: 1;
+        }
+
+        .plan-price span {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--color-medium-gray);
+        }
+        
+        .plan-details {
+            list-style: none;
+            flex-grow: 1; /* Push the button to the bottom */
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .plan-details li {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .plan-details li svg {
+            color: var(--color-teal);
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 18px 25px;
+            background: var(--color-navy);
+            color: var(--color-white);
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .cta-button.teal {
+            /* Highlight CTA color for the best value plan */
+            background: var(--color-teal); 
+            box-shadow: 0 4px 10px rgba(26, 167, 164, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #147a78; /* Darker teal on hover */
+            transform: translateY(-1px);
+        }
+        
+        .cta-button.navy:hover {
+            background: #142f53; /* Darker navy on hover */
+        }
+        
+        /* New Modal Styling */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.is-visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--color-white);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .modal-content h3 {
+            color: var(--color-navy);
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-medium-gray);
+        }
+
+        .modal-content input[type="text"],
+        .modal-content input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 16px;
+            color: var(--color-charcoal);
+        }
+
+        .modal-content input[type="text"]:focus,
+        .modal-content input[type="email"]:focus {
+            outline: none;
+            border-color: var(--color-navy);
+        }
+
+        .modal-plan-summary {
+            background: var(--color-light-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--color-navy);
+            font-size: 18px;
+        }
+
+
+        .note {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 15px;
+            color: var(--color-medium-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .plans-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .plan-card {
+                max-width: 90%;
+            }
+            .pricing-header h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pricing-header">
+        <h1>Simple Pricing for Wholesale Management</h1>
+        <p>Choose the plan that best fits your business volume and needs.</p>
+    </div>
+
+    <div class="plans-container">
+
+        <div class="plan-card">
+            <div class="plan-header">
+                <h2>Basic</h2>
+                <div class="plan-price">
+                    €7.99<span>/ 3 months</span>
+                </div>
+            </div>
+            
+            <ul class="plan-details">
+                <li><i data-feather="check-circle"></i> Up to **100 Invoices per Day**</li>
+                <li><i data-feather="check-circle"></i> Unlimited API Requests</li>
+                <li><i data-feather="check-circle"></i> Standard Email Support</li>
+                <li><i data-feather="x-circle" style="color: #EF4444;"></i> No Monthly Data Backup</li>
+            </ul>
+
+            <button class="cta-button navy" onclick="openSubscriptionForm('Basic', '€7.99 / 3 months', 'navy')">Get Started</button>
+            <p class="note">Billed quarterly. Cancel anytime.</p>
+        </div>
+
+        <div class="plan-card featured">
+             <div class="plan-header">
+                <h2>Pro (Recommended)</h2>
+                <div class="plan-price">
+                    €30.00<span>/ year</span>
+                </div>
+            </div>
+            
+            <ul class="plan-details">
+                <li><i data-feather="check-circle"></i> Up to **300 Invoices per Day**</li>
+                <li><i data-feather="check-circle"></i> **Monthly Data Export** (CSV/PDF)</li>
+                <li><i data-feather="check-circle"></i> Dedicated Support Channel</li>
+                <li><i data-feather="check-circle"></i> Unlimited API Requests</li>
+            </ul>
+
+            <button class="cta-button teal" onclick="openSubscriptionForm('Pro (Recommended)', '€30.00 / year', 'teal')">Start Annual Savings</button>
+            <p class="note">Billed annually. Saves 34%.</p>
+        </div>
+
+        <div class="plan-card">
+             <div class="plan-header">
+                <h2>Enterprise</h2>
+                <div class="plan-price">
+                    €89.99<span>/ one-time</span>
+                </div>
+            </div>
+            
+            <ul class="plan-details">
+                <li><i data-feather="star"></i> **Full Website Rights** (White Label)</li>
+                <li><i data-feather="code"></i> Self-Hosting Capabilities</li>
+                <li><i data-feather="users"></i> Unlimited User Accounts</li>
+                <li><i data-feather="lock"></i> Lifetime Access & Updates</li>
+            </ul>
+
+            <button class="cta-button navy" onclick="openSubscriptionForm('Enterprise', '€89.99 / one-time', 'navy')">Contact Sales</button>
+            <p class="note">Licensing fee. Perfect for scaling.</p>
+        </div>
+
+    </div>
+
+    <div id="subscriptionModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSubscriptionForm()">&times;</button>
+            <h3>Subscribe Now</h3>
+            
+            <div id="modalPlanSummary" class="modal-plan-summary"></div>
+            
+            <form id="subscriptionForm" onsubmit="submitForm(event)">
+                <input type="hidden" id="selectedPlanName" name="planName">
+                <input type="hidden" id="selectedPlanPrice" name="planPrice">
+
+                <input type="text" id="subscriberName" name="subscriberName" placeholder="Your Name or Company Name" required>
+                <input type="email" id="subscriberEmail" name="subscriberEmail" placeholder="Your Email Address" required>
+                <input type="text" id="subscriberPhone" name="subscriberPhone" placeholder="Your Phone Number (Optional)">
+                
+                <button type="submit" id="submitButton" class="cta-button teal">Confirm Subscription</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Feather Icons (for checkmarks, etc.)
+        feather.replace();
+
+        // Developer email to send the information to
+        const DEVELOPER_EMAIL = "osadaron20a@gmail.com";
+
+        /**
+         * Opens the modal and pre-fills the plan information.
+         */
+        function openSubscriptionForm(name, price, colorClass) {
+            document.getElementById('selectedPlanName').value = name;
+            document.getElementById('selectedPlanPrice').value = price;
+            document.getElementById('modalPlanSummary').textContent = `Selected Plan: ${name} (${price})`;
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.className = `cta-button ${colorClass}`;
+            
+            document.getElementById('subscriptionModal').classList.add('is-visible');
+        }
+
+        /**
+         * Closes the modal.
+         */
+        function closeSubscriptionForm() {
+            document.getElementById('subscriptionModal').classList.remove('is-visible');
+        }
+
+        /**
+         * Handles the form submission: displays confirmation, and if confirmed, generates mailto link.
+         */
+        function submitForm(event) {
+            event.preventDefault(); // Stop default form submission
+            
+            const form = document.getElementById('subscriptionForm');
+            
+            const planName = document.getElementById('selectedPlanName').value;
+            const planPrice = document.getElementById('selectedPlanPrice').value;
+            const name = document.getElementById('subscriberName').value;
+            const email = document.getElementById('subscriberEmail').value;
+            const phone = document.getElementById('subscriberPhone').value || 'Not provided';
+
+            const confirmationMessage = `Are you sure you want to subscribe to the ${planName} plan for ${planPrice}? \n\nYour details will be sent via email for processing.`;
+
+            // 1. Ask for confirmation
+            if (confirm(confirmationMessage)) {
+                // 2. Generate Email Body and Subject
+                const subject = encodeURIComponent(`New Subscription Inquiry: ${planName}`);
+                
+                const body = encodeURIComponent(
+                    `New Nimo Subscription Request\n` +
+                    `---------------------------------\n` +
+                    `Plan Selected: ${planName} (${planPrice})\n` +
+                    `Subscriber Name: ${name}\n` +
+                    `Subscriber Email: ${email}\n` +
+                    `Subscriber Phone: ${phone}\n` +
+                    `---------------------------------\n` +
+                    `Please follow up to finalize payment and setup.`
+                );
+
+                // 3. Create mailto link
+                const mailtoLink = `mailto:${DEVELOPER_EMAIL}?subject=${subject}&body=${body}`;
+
+                // 4. Open default email client
+                window.location.href = mailtoLink;
+
+                // Optionally clear and close the form after successful action
+                form.reset();
+                closeSubscriptionForm();
+                
+                alert("Thank you! Your email client should now open with the subscription details pre-filled. Please send the email to finalize the request.");
+
+            } else {
+                // User cancelled the action
+                alert("Subscription cancelled. You can try again later.");
+            }
+        }
+    </script>
+</body>
+</html>
