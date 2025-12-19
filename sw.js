@@ -1,7 +1,7 @@
 const CACHE_NAME = 'nimo-cache-v1';
 const FILES_TO_CACHE = [
   '/habib_invoice-_system/',
-  '/habib_invoice-_system/indexv2.1.html',
+  '/habib_invoice-_system/index.html',
   '/habib_invoice-_system/manifest.json',
   '/habib_invoice-_system/sw.js',
   '/habib_invoice-_system/icon-192.png',

@@ -1,7 +1,7 @@
 {
   "name": "Nimo Invoice System",
   "short_name": "Nimo",
-  "start_url": "/habib_invoice-_system/indexv2.1.html",
+  "start_url": "/habib_invoice-_system/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
